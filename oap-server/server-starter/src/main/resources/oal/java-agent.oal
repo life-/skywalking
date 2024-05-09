@@ -18,8 +18,10 @@
 
 // JVM instance metrics
 instance_jvm_cpu = from(ServiceInstanceJVMCPU.usePercent).doubleAvg();
+instance_jvm_memory_used = from(ServiceInstanceJVMMemory.used).longAvg();
 instance_jvm_memory_heap = from(ServiceInstanceJVMMemory.used).filter(heapStatus == true).longAvg();
 instance_jvm_memory_noheap = from(ServiceInstanceJVMMemory.used).filter(heapStatus == false).longAvg();
+instance_jvm_memory_max = from(ServiceInstanceJVMMemory.max).longAvg();
 instance_jvm_memory_heap_max = from(ServiceInstanceJVMMemory.max).filter(heapStatus == true).longAvg();
 instance_jvm_memory_noheap_max = from(ServiceInstanceJVMMemory.max).filter(heapStatus == false).longAvg();
 instance_jvm_memory_pool_code_cache = from(ServiceInstanceJVMMemoryPool.used).filter(poolType == MemoryPoolType.CODE_CACHE_USAGE).longAvg();
@@ -38,6 +40,7 @@ instance_jvm_old_gc_time = from(ServiceInstanceJVMGC.time).filter(phase == GCPha
 instance_jvm_normal_gc_time = from(ServiceInstanceJVMGC.time).filter(phase == GCPhase.NORMAL).sum();
 instance_jvm_young_gc_count = from(ServiceInstanceJVMGC.count).filter(phase == GCPhase.NEW).sum();
 instance_jvm_old_gc_count = from(ServiceInstanceJVMGC.count).filter(phase == GCPhase.OLD).sum();
+instance_jvm_full_gc_count = from(ServiceInstanceJVMGC.count).filter(phase != GCPhase.NORMAL).sum();
 instance_jvm_normal_gc_count = from(ServiceInstanceJVMGC.count).filter(phase == GCPhase.NORMAL).sum();
 instance_jvm_thread_live_count = from(ServiceInstanceJVMThread.liveCount).longAvg();
 instance_jvm_thread_daemon_count = from(ServiceInstanceJVMThread.daemonCount).longAvg();

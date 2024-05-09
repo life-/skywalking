@@ -113,6 +113,7 @@ public class JDBCTraceQueryDAO implements ITraceQueryDAO {
             tableHelper.getTablesForRead(SegmentRecord.INDEX_NAME, startSecondTB, endSecondTB) :
             tableHelper.getTablesWithinTTL(SegmentRecord.INDEX_NAME);
         final var traces = new ArrayList<BasicTrace>();
+        final TraceBrief traceBrief = new TraceBrief(traces, 0);
 
         for (String table : tables) {
             StringBuilder sql = new StringBuilder();
@@ -191,6 +192,16 @@ public class JDBCTraceQueryDAO implements ITraceQueryDAO {
                     break;
             }
 
+            // query total count
+            jdbcClient.executeQuery(
+                    "select count(1)" + sql,
+                    resultSet -> {
+                        while (resultSet.next()) {
+                            traceBrief.setTotal(resultSet.getInt("count"));
+                        }
+                        return null;
+                    }, parameters.toArray(new Object[0])
+            );
             buildLimit(sql, from, limit);
 
             jdbcClient.executeQuery(
@@ -222,7 +233,7 @@ public class JDBCTraceQueryDAO implements ITraceQueryDAO {
                 parameters.toArray(new Object[0]));
         }
 
-        return new TraceBrief(traces); // TODO: sort,
+        return traceBrief; // TODO: sort,
     }
 
     protected void buildLimit(StringBuilder sql, int from, int limit) {

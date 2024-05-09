@@ -97,6 +97,7 @@ public class MetadataQueryEsDAO extends EsDAO implements IMetadataQueryDAO {
         serviceInstance.setId(instanceTraffic.id().build());
         serviceInstance.setName(instanceTraffic.getName());
         serviceInstance.setInstanceUUID(serviceInstance.getId());
+        serviceInstance.setLastPingTimestamp(instanceTraffic.getLastPingTimestamp());
 
         final var properties = instanceTraffic.getProperties();
         if (properties != null) {

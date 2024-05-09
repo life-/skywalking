@@ -154,12 +154,14 @@ public class TraceQueryEsDAO extends EsDAO implements ITraceQueryDAO {
                 endSecondTB
             ), search.build());
         final TraceBrief traceBrief = new TraceBrief();
+        traceBrief.setTotal(response.getHits().getTotal());
 
         for (SearchHit searchHit : response.getHits().getHits()) {
             BasicTrace basicTrace = new BasicTrace();
 
             basicTrace.setSegmentId((String) searchHit.getSource().get(SegmentRecord.SEGMENT_ID));
             basicTrace.setStart(String.valueOf(searchHit.getSource().get(SegmentRecord.START_TIME)));
+            basicTrace.setServiceName(IDManager.ServiceID.analysisId((String) searchHit.getSource().get(SegmentRecord.SERVICE_ID)).getName());
             basicTrace.getEndpointNames().add(
                 IDManager.EndpointID.analysisId(
                     (String) searchHit.getSource().get(SegmentRecord.ENDPOINT_ID)

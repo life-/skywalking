@@ -17,8 +17,11 @@
  */
 
 // Service scope metrics
+service_calls_count = from(Service.*).count();
+service_error_count = from(Service.*).filter(status != true).count();
 service_resp_time = from(Service.latency).longAvg();
 service_sla = from(Service.*).percent(status == true);
+service_error_rate = from(Service.*).percent(status != true);
 service_cpm = from(Service.*).cpm();
 service_percentile = from(Service.latency).percentile(10); // Multiple values including p50, p75, p90, p95, p99
 service_apdex = from(Service.latency).apdex(name, status);
@@ -46,11 +49,23 @@ service_instance_relation_client_percentile = from(ServiceInstanceRelation.laten
 service_instance_relation_server_percentile = from(ServiceInstanceRelation.latency).filter(detectPoint == DetectPoint.SERVER).percentile(10); // Multiple values including p50, p75, p90, p95, p99
 
 // Service Instance Scope metrics
+service_instance_calls_count = from(ServiceInstance.*).count();
+service_instance_error_count = from(ServiceInstance.*).filter(status != true).count();
 service_instance_sla = from(ServiceInstance.*).percent(status == true);
+service_instance_error_rate = from(ServiceInstance.*).percent(status != true);
 service_instance_resp_time = from(ServiceInstance.latency).longAvg();
+service_instance_slow_calls_count = from(ServiceInstance.*).filter(latency > 1000).count();
 service_instance_cpm = from(ServiceInstance.*).cpm();
 
 // Endpoint scope metrics
+endpoint_calls_count = from(Endpoint.*).count();
+endpoint_error_count = from(Endpoint.*).filter(status != true).count();
+endpoint_error_rate = from(Endpoint.*).percent(status != true);
+endpoint_http_status_code_200_count = from(Endpoint.*).filter(httpResponseStatusCode == 200).count();
+endpoint_http_status_code_2xx_count = from(Endpoint.*).filter(httpResponseStatusCode >= 200  ).filter( httpResponseStatusCode < 300).count();
+endpoint_http_status_code_3xx_count = from(Endpoint.*).filter(httpResponseStatusCode >= 300 ).filter( httpResponseStatusCode < 400).count();
+endpoint_http_status_code_4xx_count = from(Endpoint.*).filter(httpResponseStatusCode >= 400 ).filter( httpResponseStatusCode < 500).count();
+endpoint_http_status_code_5xx_count = from(Endpoint.*).filter(httpResponseStatusCode >= 500 ).filter( httpResponseStatusCode < 600).count();
 endpoint_cpm = from(Endpoint.*).cpm();
 endpoint_resp_time = from(Endpoint.latency).longAvg();
 endpoint_sla = from(Endpoint.*).percent(status == true);

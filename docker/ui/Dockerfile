@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:11-jre
+ARG  BASE_IMAG='eclipse-temurin:11-jre'
+FROM $BASE_IMAGE
 
 ENV JAVA_OPTS=" -Xms256M " \
     SW_OAP_ADDRESS="http://127.0.0.1:12800" \

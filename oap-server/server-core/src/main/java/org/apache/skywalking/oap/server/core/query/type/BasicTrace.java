@@ -27,6 +27,8 @@ import lombok.Setter;
 public class BasicTrace {
     @Setter
     private String segmentId;
+    @Setter
+    private String serviceName;
     private final List<String> endpointNames;
     @Setter
     private int duration;
