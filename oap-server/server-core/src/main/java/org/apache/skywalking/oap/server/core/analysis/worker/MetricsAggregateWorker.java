@@ -19,6 +19,11 @@
 package org.apache.skywalking.oap.server.core.analysis.worker;
 
 import java.util.List;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.skywalking.oap.server.core.UnexpectedException;
 import org.apache.skywalking.oap.server.core.analysis.data.MergableBufferedData;
@@ -43,6 +48,8 @@ import org.apache.skywalking.oap.server.telemetry.api.MetricsTag;
  */
 @Slf4j
 public class MetricsAggregateWorker extends AbstractWorker<Metrics> {
+    private static final String WEBHOOK_URL = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=576657f6-bf21-430a-b068-2e195ea3ef89";
+
     public final long l1FlushPeriod;
     private AbstractWorker<Metrics> nextWorker;
     private final DataCarrier<Metrics> dataCarrier;
@@ -103,7 +110,30 @@ public class MetricsAggregateWorker extends AbstractWorker<Metrics> {
     @Override
     public final void in(Metrics metrics) {
         if (!dataCarrier.produce(metrics)) {
+            log.error("Abandon metrics: %s", metrics);
+            String content = String.format("{\"msgtype\": \"text\", \"text\": {\"content\": \"Abandon metrics: %s\"}}", metrics);
+            sendMessage(content);
             abandonCounter.inc();
+        }
+    }
+
+    /**
+     * Send wechat alert message 
+     */
+    private void sendMessage(String content) {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(WEBHOOK_URL))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(content))
+                .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            log.info("Response status code: " + response.statusCode());
+            log.info("Response body: " + response.body());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
